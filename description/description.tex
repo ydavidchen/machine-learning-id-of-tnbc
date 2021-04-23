@@ -1,0 +1,103 @@
+% Important: The "diazessay" class is a LaTex template, courtesy of N. Diaz & accessed via http://www.LaTeXTemplates.com
+\documentclass[11pt]{diazessay}
+\usepackage{hyperref}
+
+%% Title, subtitle, author(s), institution, date
+\title{\Large \textbf{Machine Learing Identification of Triple Negative Breast Cancer using mRNA Profile}} 
+% \title{\textbf{Main Title in Boldface} // {subtitle}} %if with subtitle
+\author{David Chen, Ph.D.}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+%TODO: Uncomment to include abstract, or delete
+% \begin{abstract} \end{abstract}
+
+%TODO: Uncomment to manually include keywords, if desired
+% \hspace*{3mm}\textit{Keywords:} lorem, ipsum 
+% \vspace{30pt}
+
+\section{Overview}
+
+Triple Negative Breast Cancer Is the most aggressive breast cancer . It has limited treatment options because Such cancers do not express ER, PR, and HER2 receptors that are drug targets. Determining whether a patient's cancer has the triple-negative status would require effort from a clinician. The process can require time and cause delay. Further and more importantly, the assessments by clinicians might not be consistent. \\
+
+Machine learning and AI have been used for more accurate cancer diagnosis. Specifically, machine learning can help distinguish cancer from healthy,, non-caner cells with better accuracy and consistency. Similarly, machine learning can also be used to further stratify cancer subtypes. The input for such classifiers can be very flexible, that is, the features can be derived from clinical information, images, or molecular/genomic data. \\
+
+Related works (refs.\cite{lehmann2011} and \cite{wu2021}) have attempted to address the breast cancer subtyping problems using machine learning. Ref.\cite{lehmann2011} uses a regression approach to individually estimate  ER, PR, and HER2 receptor status, which isn't a direct approach to assign Triple Negative Breast Cancer status. Ref. \cite{wu2021}, only published within the last 2 months, achieved impressive accuracy but rather low precision and recall. It is not surprising because of the severe class imbalance: Triple Negative Breast Cancer comprise about only $10-15\%$ of all breast cancers. \\
+
+In this project, I will use machine learning to determine whether a breast cancer sample is Triple Negative Breast Cancer or not. The input of the classifier is that patient's mRNA data ($\in \mathbb{R}^{m \times 1}, m > 20,000$).  I will make use of cloud computing with fast, reliable hyperparameter tuning implemented in AWS Sagemaker.
+
+\section{Problem Statement}
+
+The \textit{primary goal} of this project is to build a binary classifier that identifies breast cancer samples that are "triple negative" (i.e. class=1) using mRNA data of $m$ genes.
+
+\section{Data Sets}
+
+The Cancer Genome Atlas is a population-scale cancer study with  over $1,000$ breast cancer patients. The majority (>90\%) of these patients will have mRNA data (features) and TNBC status (class label, based on attributes measured by clinicians) \cite{tcga2012}. The data set is publicly and freely available. For this project, the mRNA features and clinical data (used to infer class labels 1 vs. 0)  were downloaded from cBioPortal.
+
+\section{Solution Statement}
+
+Given $n \approx 1,000$ patients, the expected solutions will be a $\mathbb{R}^{1 \times n}$ array of class labels predicted by fitting the \textit{trained machine-learning model} to the mRNA values of a given breast cancer patient.
+
+\section{Benchmark Model}
+
+A recently published work on the subject \cite{wu2021} showed the best model is SVM with 10-fold cross validation. I will build this benchmark model from scratch following the authors' written descriptions using Python/SageMaker.
+
+\section{Evaluation Criteria}
+
+For hyperparameter selection, mean squared error (MSE) will be used as the metric for selecting hyperparameters. To address class imbalance, options such as positive class weights and target precision (or recall) may be used. \\
+
+Due to the class imbalance (the positive class is very rare), accuracy is a particularly poor choice. Therefore, for actual evaluations, the primary metric will be \textit{F1 score}:
+
+$$F1 = HarmonicMean(precision, recall)$$
+
+which is already implemented in Python libraries sklearn. Component metrics (precision and recall score) and related metrics (e.g. specificity, accuracy score per class), will also be reported.
+
+
+\section{Projected Plan}
+
+\subsection{Data Preprocessing}
+
+\begin{itemize}
+	\item Access and download mRNA data and clinical (meta) data from the online repository, cBioPortal.
+	\item Define class label based on clinical data downloaded.
+	\item Select patients with available data and labels, and those meeting the following criteria: gender female, tumors non-metastatic
+	\item No further feature preprocessing is necessary, since the mRNA features downloaded are already normalized as "Z-scores" and as structured data frame.
+\end{itemize}
+
+\subsection{Exploratory Data Analysis}
+
+\begin{itemize}
+	\item Perform unsupervised learning of features to identify data clusters, and color code by class label.
+	\item Perform univariate statistical tests (e.g. Student's $t$ test, Fisher's Exact Test) to determine if the class label and other available or calculated information are significantly related.
+\end{itemize}
+
+\subsection{Classification and Hyperparameter Tuning}
+
+All models will be built using AWS Sagemaker, Python 3.6 with libraries/frameworks including PyTorch and SKLearn.
+
+\begin{itemize}
+	\item Train the benchmark model with $10$-fold CV.
+	\item Use AWS Train and optimize hyperparameters for several popular machine learning models suitable for high-dimensional data with $10$-fold CV, including: 
+	\begin{enumerate}
+		\item \textbf{XGBoost}: maximum depth, number of boosted rounds, early stopping rounds
+		\item \textbf{Custom Neural Network}: optimizer, learning rate, drop out rate, epochs, batch size
+	\end{enumerate}
+	\item Compare each classifier trained with the benchmark, and with each other
+\end{itemize} 
+
+\subsection{Final Evaluation}
+
+Select the best model from each method/classifier, and apply to the hold-out test set. To prevent data leakage, the hold-out test set will only be used at the very end and not exposed to any classifiers during training. 
+
+% \clearpage
+\vskip0.4in
+
+%% References
+\bibliographystyle{unsrt}
+\bibliography{references.bib}
+
+\end{document}
+
+
