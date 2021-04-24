@@ -3,7 +3,7 @@
 \usepackage{hyperref}
 
 %% Title, subtitle, author(s), institution, date
-\title{\Large \textbf{Machine Learing Identification of Triple Negative Breast Cancer using mRNA Profile}} 
+\title{\Large \textbf{Machine Learing Identification of Triple Negative Breast Cancer using mRNA Profile as Features}} 
 % \title{\textbf{Main Title in Boldface} // {subtitle}} %if with subtitle
 \author{David Chen, Ph.D.}
 \date{\today}
@@ -20,17 +20,17 @@
 
 \section{Background}
 
-Triple Negative Breast Cancer Is the most aggressive breast cancer . It has limited treatment options because Such cancers do not express ER, PR, and HER2 receptors that are drug targets. Determining whether a patient's cancer has the triple-negative status would require effort from a clinician. The process can require time and cause delay. Further and more importantly, the assessments by clinicians might not be consistent. \\
+Triple Negative Breast Cancer is the most aggressive breast cancer subtype. Such cancers limited treatment options because they do not express ER, PR, and HER2 hormone receptors that can be targeted by endocrine drugs. Early detection of the "triple-negative" status is critical. Determining whether a patient's cancer has the triple-negative status would require effort from a clinician. The process can require time and cause delay. Further and more importantly, the assessments by clinicians might not be consistent. \\
 
 Machine learning and AI have been used for more accurate cancer diagnosis. Specifically, machine learning can help distinguish cancer from healthy,, non-caner cells with better accuracy and consistency. Similarly, machine learning can also be used to further stratify cancer subtypes. The input for such classifiers can be very flexible, that is, the features can be derived from clinical information, images, or molecular/genomic data. \\
 
-Related works (refs.\cite{lehmann2011} and \cite{wu2021}) have attempted to address the breast cancer subtyping problems using machine learning. Ref.\cite{lehmann2011} uses a regression approach to individually estimate  ER, PR, and HER2 receptor status, which isn't a direct approach to assign Triple Negative Breast Cancer status. Ref. \cite{wu2021}, only published within the last 2 months, achieved impressive accuracy but rather low precision and recall. It is not surprising because of the severe class imbalance: Triple Negative Breast Cancer comprise about only $10-15\%$ of all breast cancers. \\
+Related works (refs.\cite{lehmann2011} and \cite{wu2021}) have attempted to address the breast cancer subtyping problems using machine learning. Ref.\cite{lehmann2011} uses a regression approach to individually estimate ER, PR, and HER2 receptor status, which isn't a direct approach to assign Triple Negative Breast Cancer status. Ref. \cite{wu2021}, published within the last 2 months, achieved impressive accuracy but rather low precision and recall. It is not surprising because of the severe class imbalance: Triple Negative Breast Cancer comprise about only $10-15\%$ of all breast cancers. \\
 
 In this project, I will use machine learning to determine whether a breast cancer sample is Triple Negative Breast Cancer or not. The input of the classifier is that patient's mRNA data ($\in \mathbb{R}^{m \times 1}, m > 20,000$).  I will make use of cloud computing with fast, reliable hyperparameter tuning implemented in AWS Sagemaker.
 
 \section{Problem Statement}
 
-The \textit{primary goal} of this project is to build a binary classifier that identifies breast cancer samples that are "triple negative" (i.e. class=1) using mRNA data of $m$ genes.
+The \textit{primary goal} of this project is to build a binary classifier that identifies breast cancer samples (rows) that are "triple negative" (i.e. Label=1) using mRNA data of $m$ genes (columns).
 
 \section{Datasets and Inputs}
 
@@ -42,7 +42,9 @@ Given $n \approx 1,000$ patients, the expected solutions will be a $\mathbb{R}^{
 
 \section{Benchmark Model}
 
-A recently published work on the subject \cite{wu2021} showed the best model is SVM with 10-fold cross validation. I will build this benchmark model from scratch following the authors' written descriptions using Python/SageMaker.
+A recently published work on the subject \cite{wu2021} showed the best model is SVM with 10-fold cross validation. This model achieved accuracy of 0.9 but F1 score of 0.67 due to severe class imbalance. \\
+
+I will build this benchmark model from scratch following the authors' written descriptions using Python/SageMaker. I expect that the results to vary/differ from those of the original authors, but I will use whatever I will have determined as the new benchmark for comparison.
 
 \section{Evaluation Metrics}
 
@@ -60,15 +62,16 @@ which is already implemented in Python libraries sklearn. Component metrics (pre
 \subsection{Data Preprocessing}
 
 \begin{itemize}
-	\item Access and download mRNA data and clinical (meta) data from the online repository, cBioPortal.
+	\item Access and download mRNA data and clinical (meta) data from the online repository, cBioPortal (\url{https://www.cbioportal.org/}).
 	\item Define class label based on clinical data downloaded.
 	\item Select patients with available data and labels, and those meeting the following criteria: gender female, tumors non-metastatic
-	\item No further feature preprocessing is necessary, since the mRNA features downloaded are already normalized as "Z-scores" and as structured data frame.
+	\item No major additional feature preprocessing is necessary, since the mRNA features downloaded are already normalized as "Z-scores" and as structured data frame.
 \end{itemize}
 
 \subsection{Exploratory Data Analysis}
 
 \begin{itemize}
+	\item Confirm all patients have had informed consent -- for ethical reasons (even though the data is publically available)
 	\item Perform unsupervised learning of features to identify data clusters, and color code by class label.
 	\item Perform univariate statistical tests (e.g. Student's $t$ test, Fisher's Exact Test) to determine if the class label and other available or calculated information are significantly related.
 \end{itemize}
@@ -78,13 +81,14 @@ which is already implemented in Python libraries sklearn. Component metrics (pre
 All models will be built using AWS Sagemaker, Python 3.6 with libraries/frameworks including PyTorch and SKLearn.
 
 \begin{itemize}
-	\item Train the benchmark model with $10$-fold CV.
+	\item Perform feature selection using L1- or model-based approaches, implemented in scikit-learn
+	\item Train the benchmark model with $10$-fold CV with AWS Sagemaker - SKLearn.
 	\item Use AWS Train and optimize hyperparameters for several popular machine learning models suitable for high-dimensional data with $10$-fold CV, including: 
 	\begin{enumerate}
-		\item \textbf{XGBoost}: maximum depth, number of boosted rounds, early stopping rounds
-		\item \textbf{Custom Neural Network}: optimizer, learning rate, drop out rate, epochs, batch size
+		\item \textbf{XGBoost (Sagemaker)}: maximum depth, number of boosted rounds, early stopping rounds
+		\item \textbf{Custom Neural Network (Sagemaker - PyTorch)}: optimizer, learning rate, drop out rate, epochs, batch size
 	\end{enumerate}
-	\item Compare each classifier trained with the benchmark, and with each other
+	\item Compare each classifier trained with the benchmark, and with each other.
 \end{itemize} 
 
 \subsection{Final Evaluation}
