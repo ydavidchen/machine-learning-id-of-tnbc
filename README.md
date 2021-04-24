@@ -1,6 +1,6 @@
-# Machine Learing Identification of Triple Negative Breast Cancer | Project
+# Machine Learing Identification of Triple Negative Breast Cancer | Project in Healthcare
 
-An AWS Sagemaker-based ML journey | David Chen 
+An AWS Sagemaker-based ML journey | David Chen, Ph.D.
 
 ## Goals
 
@@ -35,10 +35,10 @@ ADD Label AS (CASE WHEN er_ihc='Negative', her2_ihc='Negative', pr_ihc='Negative
 
 _Idea_
 
-* Lehmann et al. (2011)
-* Wu &amp; Hicks (2021)
+* Lehmann et al. J Clin. Invest. (2011)
+* Wu &amp; Hicks. J Personalized Med. (2021)
 
-_Data_: 3. Cancer Genome Atlas Network (2012).Nature
+_Data_: Cancer Genome Atlas Network (2012). Nature
 
 _Approach_
 

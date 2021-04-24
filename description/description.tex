@@ -18,7 +18,7 @@
 % \hspace*{3mm}\textit{Keywords:} lorem, ipsum 
 % \vspace{30pt}
 
-\section{Overview}
+\section{Background}
 
 Triple Negative Breast Cancer Is the most aggressive breast cancer . It has limited treatment options because Such cancers do not express ER, PR, and HER2 receptors that are drug targets. Determining whether a patient's cancer has the triple-negative status would require effort from a clinician. The process can require time and cause delay. Further and more importantly, the assessments by clinicians might not be consistent. \\
 
@@ -32,7 +32,7 @@ In this project, I will use machine learning to determine whether a breast cance
 
 The \textit{primary goal} of this project is to build a binary classifier that identifies breast cancer samples that are "triple negative" (i.e. class=1) using mRNA data of $m$ genes.
 
-\section{Data Sets}
+\section{Datasets and Inputs}
 
 The Cancer Genome Atlas is a population-scale cancer study with  over $1,000$ breast cancer patients. The majority (>90\%) of these patients will have mRNA data (features) and TNBC status (class label, based on attributes measured by clinicians) \cite{tcga2012}. The data set is publicly and freely available. For this project, the mRNA features and clinical data (used to infer class labels 1 vs. 0)  were downloaded from cBioPortal.
 
@@ -44,7 +44,7 @@ Given $n \approx 1,000$ patients, the expected solutions will be a $\mathbb{R}^{
 
 A recently published work on the subject \cite{wu2021} showed the best model is SVM with 10-fold cross validation. I will build this benchmark model from scratch following the authors' written descriptions using Python/SageMaker.
 
-\section{Evaluation Criteria}
+\section{Evaluation Metrics}
 
 For hyperparameter selection, mean squared error (MSE) will be used as the metric for selecting hyperparameters. To address class imbalance, options such as positive class weights and target precision (or recall) may be used. \\
 
@@ -55,7 +55,7 @@ $$F1 = HarmonicMean(precision, recall)$$
 which is already implemented in Python libraries sklearn. Component metrics (precision and recall score) and related metrics (e.g. specificity, accuracy score per class), will also be reported.
 
 
-\section{Projected Plan}
+\section{Projected Design}
 
 \subsection{Data Preprocessing}
 
