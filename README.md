@@ -1,6 +1,8 @@
-# Machine Learing Identification of Triple Negative Breast Cancer | Project in Healthcare
+# Machine Learing Identification of Triple Negative Breast Cancer 
 
-An AWS Sagemaker-based ML journey | David Chen, Ph.D.
+**AWS Sagemaker Machine Learning Engineering Project in Healthcare**
+
+David Chen, Ph.D.
 
 ## Goals
 
@@ -33,7 +35,7 @@ ADD Label AS (CASE WHEN er_ihc='Negative', her2_ihc='Negative', pr_ihc='Negative
 
 `proposal/`: LaTex document for the proposal
 
-`src/`: All code in Python, including Jupyter Notebooks and Python Scripts
+`src/`: All code in Python, including Jupyter Notebooks and Python Scripts. All code are written within the AWS Sagemaker Notebook Instance. Each script or file is a copy exported from Sagemaker.
 
 `report/`: LaTex document for report
 
