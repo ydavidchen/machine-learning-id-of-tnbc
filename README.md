@@ -8,6 +8,20 @@ David Chen, Ph.D.
 
 To build a binary classifier that identifies breast cancer samples that are "triple negative" (which are the most aggressive and difficult to treat).
 
+## Software & Libraries
+
+This project focuses on **AWS Sagemaker**, featuring:
+
+* Sagemker - XGBooast
+* Sagemaker - PyTorch
+* Sagemaker - SKLearn (benchmark model)
+
+Libraries for supporting the project includes:
+
+* scikit-learn (Model Selection, Preprocessing modules, Metrics, Unsupervised Learning)
+* Pandas for data wrangling &amp; management
+* Matplotlib, numpy
+
 ## Data Source
 
 All data used in this project are publicly and freely available, downloaded from [cBioPortal](https://www.cbioportal.org/).
