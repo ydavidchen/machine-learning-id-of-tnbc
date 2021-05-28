@@ -92,12 +92,12 @@ which is already implemented in Python libraries \textit{sklearn}. Component met
 All models will be built using AWS Sagemaker, Python 3.6 with libraries/frameworks including PyTorch and SKLearn.
 
 \begin{itemize}
-	\item Perform feature selection using L1- or model-based approaches, implemented in scikit-learn
-	\item Train the benchmark model with $10$-fold CV with AWS Sagemaker - SKLearn.
-	\item Use AWS Train and optimize hyperparameters for several popular machine learning models suitable for high-dimensional data with $10$-fold CV, including: 
+	\item Perform feature selection using L1- or model-based approaches, implemented in \textit{scikit-learn}
+	\item Train the benchmark modelwith \textit{Sagemaker SKLearn}.
+	\item Use AWS to train and optimize hyperparameters for several popular machine learning models suitable for high-dimensional data, including: 
 	\begin{enumerate}
 		\item \textbf{XGBoost (Sagemaker)}: maximum depth, number of boosted rounds, early stopping rounds
-		\item \textbf{Custom Neural Network (Sagemaker - PyTorch)}: optimizer, learning rate, drop out rate, epochs, batch size
+		\item \textbf{Custom Neural Network (Sagemaker PyTorch)}: optimizer, learning rate, drop out rate, epochs, batch size
 	\end{enumerate}
 	\item Compare each classifier trained with the benchmark, and with each other.
 \end{itemize} 
