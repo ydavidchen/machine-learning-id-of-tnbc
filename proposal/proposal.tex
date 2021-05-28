@@ -3,7 +3,7 @@
 \usepackage{hyperref}
 
 %% Title, subtitle, author(s), institution, date
-\title{\Large \textbf{Machine Learing Identification of Triple Negative Breast Cancer using mRNA Profile as Features}} 
+\title{\Large \textbf{Machine Learing Identification of Triple Negative Breast Cancers using mRNA Profile as Features with Reduced Potential of Leakage}} 
 % \title{\textbf{Main Title in Boldface} // {subtitle}} %if with subtitle
 \author{David Chen, Ph.D.}
 \date{\today}
@@ -34,7 +34,15 @@ The \textit{primary goal} of this project is to build a binary classifier that i
 
 \section{Datasets and Inputs}
 
-The Cancer Genome Atlas is a population-scale cancer study with  over $1,000$ breast cancer patients. The majority (>90\%) of these patients will have mRNA data (features) and TNBC status (class label, based on attributes measured by clinicians) \cite{tcga2012}. The data set is publicly and freely available. For this project, the mRNA features and clinical data (used to infer class labels 1 vs. 0)  were downloaded from cBioPortal.
+The Cancer Genome Atlas (TCGA) is a population-scale cancer study with  over $1,000$ breast cancer patients. The majority (>90\%) of these patients will have mRNA data (features) and TNBC status (class label, based on attributes measured by clinicians) \cite{tcga2012}. The data set is publicly and freely available. For this project, the mRNA features and clinical data (used to infer class labels 1 vs. 0)  were downloaded from cBioPortal. \\
+
+More specifically:
+
+\begin{itemize}
+	\item The specific TCGA dataset I will use is the TCGA Breast Cancer dataset (code TCGA-BRCA). This dataset has approximately $1,100$ patients or rows.
+	\item The number of columns (or genes) available is approximately $20,000$. However, many genes have missing values due to issues such as technical problems with instrument measurement. I plan to exclude genes (columns) with $>50\%$ missing values perform mean-imputation for the rest still with missingness.
+	\item There may be concerns regarding the dimensionality of the data. This is part of the nature of the problem in hand and also why the problem is interesting and worthy of investigation. I will consider using dimensionality reduction methods (including PCA and t-SNE) for data exploration purpose and possibly feature engineering for machine learning.
+\end{itemize}
 
 \section{Solution Statement}
 
@@ -48,23 +56,26 @@ I will build this benchmark model from scratch following the authors' written de
 
 \section{Evaluation Metrics}
 
-For hyperparameter selection, mean squared error (MSE) will be used as the metric for selecting hyperparameters. To address class imbalance, options such as positive class weights and target precision (or recall) may be used. \\
+During model training, I will use area under the receiver operation curve (AUROC), and visually inspect the ROC curve itself. I will also inspect metrics including F1 score (see below), precision, recall, accuracy, and mean accuracy per class. \\
 
 Due to the class imbalance (the positive class is very rare), accuracy is a particularly poor choice. Therefore, for actual evaluations, the primary metric will be \textit{F1 score}:
 
 $$F1 = HarmonicMean(precision, recall)$$
 
-which is already implemented in Python libraries sklearn. Component metrics (precision and recall score) and related metrics (e.g. specificity, accuracy score per class), will also be reported.
+which is already implemented in Python libraries \textit{sklearn}. Component metrics (precision and recall score) and related metrics (e.g. specificity, accuracy score per class), will also be reported.
 
 
 \section{Projected Design}
 
 \subsection{Data Preprocessing}
 
+\textbf{A key item pointed out by the Udacity reviewer is listed as the second to the last bullet point below.}
+
 \begin{itemize}
 	\item Access and download mRNA data and clinical (meta) data from the online repository, cBioPortal (\url{https://www.cbioportal.org/}).
 	\item Define class label based on clinical data downloaded.
 	\item Select patients with available data and labels, and those meeting the following criteria: gender female, tumors non-metastatic
+	\item To prevent data leakage, genes ESR1, PGR1, and ERBB2 (HER2) will be removed from the feature space.
 	\item No major additional feature preprocessing is necessary, since the mRNA features downloaded are already normalized as "Z-scores" and as structured data frame.
 \end{itemize}
 
@@ -93,7 +104,7 @@ All models will be built using AWS Sagemaker, Python 3.6 with libraries/framewor
 
 \subsection{Final Evaluation}
 
-Select the best model from each method/classifier, and apply to the hold-out test set. To prevent data leakage, the hold-out test set will only be used at the very end and not exposed to any classifiers during training. 
+Select the best model from each method/classifier, and apply to the hold-out test set. To prevent data leakage, the hold-out test set will only be used at the very end and not exposed to any classifiers during training. Metrics and plots mentioned in the \textbf{Evaluation Metrics} sections will be reported here as well.
 
 % \clearpage
 \vskip0.4in
