@@ -31,6 +31,15 @@ ADD Label AS (CASE WHEN er_ihc='Negative', her2_ihc='Negative', pr_ihc='Negative
 
 ## File Structure
 
+`proposal/`: LaTex document for the proposal
+
+`src/`: All code in Python, including Jupyter Notebooks and Python Scripts
+
+`report/`: LaTex document for report
+
+`assets/`: Git-ignored. Consists of graphics/figures and raw datasets.
+
+
 ## References
 
 _Idea_
