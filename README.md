@@ -4,23 +4,23 @@
 
 David Chen, Ph.D.
 
-## Goals
+## Primary Objective
 
-To build a binary classifier that identifies breast cancer samples that are "triple negative" (which are the most aggressive and difficult to treat).
+To build a binary classifier that identifies breast cancers that are "triple negative", which do not express ER, PR and HER2 hormone receptors. This cancer subtype is of interest because they are aggressive and do not respond to hormonal therapies that are otherwise effective in treating cancers.
 
 ## Software & Libraries
 
 This project focuses on **AWS Sagemaker**, featuring:
 
-* Sagemker - XGBooast
-* Sagemaker - PyTorch
-* Sagemaker - SKLearn (benchmark model)
+* scikit-learn Gaussian SVM: benchmark model
+* Sagemker XGBooast with hyperparameter tuning: target model
 
 Libraries for supporting the project includes:
 
+* sagemaker &amp; boto3 for AWS S3 file access, Notebook instance/sessions
 * scikit-learn (Model Selection, Preprocessing modules, Metrics, Unsupervised Learning)
-* Pandas for data wrangling &amp; management
-* Matplotlib, numpy
+* pandas for data wrangling &amp; management
+* matplotlib, numpy, scipy.stats
 
 ## Data Source
 

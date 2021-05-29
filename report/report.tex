@@ -1,0 +1,247 @@
+% Important: The "diazessay" class is a LaTex template, courtesy of N. Diaz & accessed via http://www.LaTeXTemplates.com
+\documentclass[11pt]{diazessay}
+\usepackage{hyperref}
+\usepackage{graphicx}
+ \usepackage{booktabs}
+
+%% Title, subtitle, author(s), institution, date
+\title{\Large \textbf{Machine Learning Identification of Triple Negative Breast Cancers using Expression of Genes with Minimal Data Leakage}} 
+% \title{\textbf{Main Title in Boldface} // {subtitle}} %if with subtitle
+\author{David Chen, Ph.D. \\ Project repo: \url{github.com/ydavidchen/machine-learning-id-of-tnbc}}
+
+\begin{document}
+\maketitle
+
+%TODO: Uncomment to include abstract, or delete
+% \begin{abstract} \end{abstract}
+
+%TODO: Uncomment to manually include keywords, if desired
+% \hspace*{3mm}\textit{Keywords:} lorem, ipsum 
+% \vspace{30pt}
+
+\section{Definition}
+
+\subsection{Project Overview}
+
+Triple Negative Breast Cancer is the most aggressive breast cancer subtype. Such cancers have limited treatment options because they do not express ER (\textit{ESR1} gene), PR (\textit{PGR} gene), and HER2 (\textit{ERBB2} gene) hormone receptors that can be targeted by endocrine drugs, and hence the "triple-negative" annotation. Early detection of the \textit{triple-negative} cancer subtype is crucial to making timely clinical decisions. \\
+
+Determining whether a cancer has is triple-negative requires effort from a domain-specific expert: a medically trained pathologist. The process requires additional time and human resource. More importantly, the assessment procedure by clinicians might not be consistent and reliable. In cancer diagnosis and other image , it is well-known that machine learning algorithms often outcompete human domain experts. \\
+
+Machine learning has been increasingly used in healthcare. In cancer machine learning has been used to diagnose cancer and subtype diseases. The input for such classifiers can be very flexible, that is, the features can be derived from clinical information, images, or genomic profiles. Here, I am interested in leveraging machine learning to subtype all breast cancers into triple-negative (class 1) and non-triple negative (class 0). \\
+
+Related works (refs.\cite{lehmann2011} and \cite{wu2021}) attempted to address the breast cancer subtyping problems using machine learning. Ref.\cite{lehmann2011} uses a regression approach to individually estimate ER, PR, and HER2 receptor status, which was not a direct approach to the problem and would require three separate classifiers followed by manual data wrangling to assign a triple-negative class label. Ref. \cite{wu2021} recently achieved impressive accuracy but rather low precision and recall. This result is not surprising because of the severe class imbalance: the triple-negative subtype comprise about only $10-15\%$ of all breast cancers. \\
+
+In this project, I use a machine-learning approach to determine whether a breast cancer specimen has a triple-negative clinical diagnosis using its gene expression profile. Gene expression studies have become increasingly popular, and the high-dimensional nature of data represents the next generation of biomedicine. It is very crucial that the effort in machine learning and AI be under way to utilize gene expression data for scientifically and clinically relevant tasks, such as identifying the triple-negative cancer subtype.
+
+\subsection{Problem Statement}
+
+The \textit{primary goal} of this project is to build a binary classifier that identifies breast cancer samples (rows) that are "triple negative" (i.e. Label=1) using mRNA data of $m$ genes (columns). \\
+
+ The \textbf{input} of the classifier is the gene expression of a biological sample from a woman diagnosed with a non-metastatic breast canccer. The original gene expression data has a high dimension  ($\in \mathbb{R}^{m \times 1}, m > 20,000$), but will be reduced by L1/LASSO feature selection. \\
+ 
+The \textbf{output} will be a $\mathbb{R}^{1 \times n}$ array of class labels predicted by fitting the \textit{trained model} (either the benchmark or the target model) to the gene features of an observation.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Methodology}
+
+\subsection{Data Preprocessing}
+
+The Cancer Genome Atlas (TCGA) is a population-scale cancer study with  over $1,100$ breast cancer patients. The majority (>90\%) of these patients have mRNA data (features) and clinical data that contains columns needed to define the class label (see sections below) \cite{tcga2012}. The dataset is freely available to the public for download from multiple Internet repositories. For this project, the mRNA features and clinical data (used to infer class labels 1 vs. 0) were downloaded from cBioPortal (\url{https://www.cbioportal.org/}. \\
+
+\subsubsection{Data Observations}
+
+The specific dataset is the TCGA Breast Cancer dataset. The original dataset has approximately $n=1,100$ patients or rows. Observations with the following characteristics were excluded:
+
+\begin{itemize}
+	\item were not from a female subject
+	\item lacked gene expression data (features)
+	\item had metastatic (non-primary) cancer
+	\item lacked sufficient inforation to define class labels (discussed below)
+\end{itemize}
+
+
+\subsubsection{Class Labels for Observations}
+
+Class labels are defined based on whether an observation has a "triple-negative" clinical diagnosis. That is, whether a pathologist evaluated a biospecimen, under the microscope, had detectable proteins of ER, PR, and HER2 receptors. The records are publicly available as a clinical meta data. \\
+
+However, not all observations underwent the ER/PR/HER2 scoring process. Sometimes the observations were skipped, while other times they might be omitted due to data entry issues. However, the class label may still be definable. \\
+
+The rules for defining the class label were as follows:
+
+\begin{itemize}
+	\item If all 3 receptors' statuses are missing in an observation, we canot work with that observation which must be excluded.
+	\item Observations with (2 missing + 1 negative), (1 missing + 2 negative) cannot be assigned a definitive abel and were also excluded
+	\item If at least 1 receptor is positive, the class label would be 0 (i.e. not triple-negative).
+	\item Scoring columns with values such as "equivocal" or "intermediate" are considered positive.
+\end{itemize}
+
+The final dataset population has $n=999$ observations. For supervised machine learning, $100 (10\%)$ of data was held out for final evaluation, while  the remainder of $799 (80\%)$ and $100 (10\%)$ were used for training and validation, respectively. 
+
+\subsubsection{Features}
+
+The number of columns (or genes) available is approximately $20,000$. Since the data available to download was already standard-normalized, feature values were used as-is without further preprocessing or adjustments.\\
+
+A small fraction (1\%) of genes have missing values due to issues such as technical problems with instrument measurement. I excluded the 1\% gene features (columns)(see \textbf{Notebook 1} for implementation). \\
+
+There is a conern regarding the high dimensionality of the feature space.  To address this, I used \textbf{L1/LASSO feature selection} (implemented in sklearn's SelectKBest). to reduce the feature space down to $m=33$ (see \textbf{Notebook 3} for detail). \\
+
+Genes \textit{ESR1}, \textit{PGR1}, and \textit{ERBB2} code for the ER, PR, and HER2 hormone receptors used to define the class label, respectively. Even though the gene expression values were NOT what the domain experts used to define ER, PR, and HER2 status (instead clinicans look under the microscope), the three genes removed from the feature space to 
+\textit{minimize data leakage} (see \textbf{Notebook 1}). \\
+
+\subsection{Classification and Hyperparameter Tuning}
+
+The programming environment of this project was AWS Sagemaker Notebook Instance, Conda Python 3.6. A personal Amazon AWS account was used. Models built including:
+
+\begin{itemize}
+	\item PCA for data exploration (scikit-learn; \textbf{Notebook 2})
+	\item The benchmark SVM model with \textit{scikit-learn SVM} to set a baseline performance (see \textbf{Notebook 4})
+	\item \textbf{XGBoost} with random-search hyperparameter tuning. Specifically, the hyperparameters maximum depth, number of boosted rounds, and early stopping rounds were optimized (see \textbf{Notebook 5}).
+\end{itemize}
+
+For the supervised models, I have addressed the severe class imbalance (rarity of the positive class) using \textbf{inverse class weights} (details can be found in \textbf{Notebooks 4 and 5}). The positive class here has a weight of $7.69$. \\
+
+For fair comparison of the target model (XGBoost) to the Benchmark (Gaussian SVM), I ensured variables such as the Test Set and inverse class-balance weight were identical between the modeling attempts.
+
+\subsection{Metrics}
+
+\subsubsection{Benchmark Model}
+
+A recent work \cite{wu2021} showed that a Support Vector Machine (SVM) classifier This model achieved accuracy score (unweighted) of 0.9 but an F1 score of 0.67. The rather poor F1 score was expected since the triple-negative classification is rare and the class distribution was imbalanced. As a benchmark model, I built a Gaussian SVM. The optimal set of hyperparameters was selected using random search based on validation-set AUC.
+
+\subsubsection{Evaluation Metrics}
+
+In training the model, I used the area under the receiver operation curve (AUC) metric on the hold-out validation set (n=100, 10\% of the data). \\
+
+For final model evaluation, I focused on the macro-averaged F1 score, the harmonic mean between precision and recall (whose calculations were implemented in \textit{sklearn.metrics} module). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Analysis and Results}
+
+\subsection{Exploratory Data Analysis}
+
+In a summary table, I overviewed the distribution of several key variables. Importantly I confirm all $999$ observations had \textit{informed consent}, an important criterion for performing any human subject research (\textbf{Notebook 1}). \\
+
+Next, I performed \textbf{unsupervised learning} to determine whether there is any discernible patterns in the data features especially in relation to the class labels. To this end, I performed a two-dimensional \textbf{Principal Component Analysis (PCA)} and visualized the principal components on a 2D scatter plot, which was then color-coded by class label (\textbf{Figure \ref{fig:pca}}).
+
+\begin{figure}[h]
+	\centering
+	\caption{Two-dimensional PCA of the entire dataset. Individual data points were color-coded by class label. The code for this analysis is in \textbf{Notebook 2}. }
+	\label{fig:pca}
+	\includegraphics[scale=0.75]{Figures/pca.png}
+\end{figure}
+
+As shown in (\textbf{Figure \ref{fig:pca}}), there were two predominant clusters in the dimensionality-reduced dataset. The triple-negative (class 1) data points located primarily in the upper cluster. This result suggests that gene features at the \textbf{global level} are different between the classes. Without supervision, there is already a clearcut distinction between the classes, implying that the two classes could be separated when a \textit{supervised} machine learning approach is used.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Benchmark Model: Gaussian SVM with Hyperparameter Optimization}
+
+The benchmark or baseline model is Gaussian SVM (i.e. RBF kernel). A Validation Set consisting of 10\% of data was usedfor Random Search of hyperparameters C and $\gamma$ (method ref. \cite{Stackoverflow2020}). The best hyperparameter set was decided using up to 20 candidate models' Validation-Set AUC scores (\textbf{Table \ref{table:svmhpo}}).
+
+\begin{table}[h]
+	\centering
+	\caption{Candidate SVM benchmark models built with hyperparameters from Random Search. Ranked by validation-set AUC. See \textbf{Notebook 4} for how the results were curated and exported as a CSV.} \label{table:svmhpo}
+	\begin{tabular}{@{}rrrr@{}}
+		\toprule
+		\multicolumn{1}{c}{\textbf{Candidate no.}} & \multicolumn{1}{c}{\textbf{Hyperparam C}} & \multicolumn{1}{c}{\textbf{Hyperparam gamma}} & \multicolumn{1}{c}{\textbf{Validation AUC}} \\ \midrule
+		17                                         & 125.00                                    & 0.0040                                        & 0.9070                                        \\
+		10                                         & 3.60                                      & 0.0183                                        & 0.8938                                        \\
+		14                                         & 63.89                                     & 0.0264                                        & 0.8938                                        \\
+		5                                          & 6.14                                      & 0.0073                                        & 0.8927                                        \\
+		4                                          & 22.11                                     & 0.0491                                        & 0.8927                                        \\
+		7                                          & 116.44                                    & 0.0284                                        & 0.8927                                        \\
+		8                                          & 48.84                                     & 0.0271                                        & 0.8927                                        \\
+		13                                         & 76.33                                     & 0.0546                                        & 0.8907                                        \\
+		9                                          & 162.68                                    & 0.0449                                        & 0.8907                                        \\
+		0                                          & 4.85                                      & 0.0468                                        & 0.8907                                        \\
+		11                                         & 53.58                                     & 0.0586                                        & 0.8887                                        \\
+		19                                         & 39.25                                     & 0.0436                                        & 0.8887                                        \\
+		18                                         & 158.07                                    & 0.0341                                        & 0.8887                                        \\
+		6                                          & 84.28                                     & 0.1222                                        & 0.8825                                        \\
+		15                                         & 83.21                                     & 0.2210                                        & 0.8795                                        \\
+		12                                         & 44.62                                     & 0.1438                                        & 0.8784                                        \\
+		3                                          & 14.71                                     & 0.1930                                        & 0.8784                                        \\
+		2                                          & 144.58                                    & 0.2097                                        & 0.8784                                        \\
+		1                                          & 9.42                                      & 0.3500                                        & 0.8754                                        \\
+		16                                         & 24.74                                     & 0.3498                                        & 0.8754                                        \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+The best candidate achieved an validation-set AUC of 0.907 (\textbf{Table \ref{table:svmhpo}}). This candidate was chosen as the Benchmark for evaluation on the hold-out Test Set. \\
+
+Applying the chosen benchmark model is applied to the hold-out test set (not exposed to training) yielded a macro-averaged  F1 score of 0.81 (\textbf{Notebook 4 classification report}). \textbf{Figure \ref{fig:svm}} shows the ROC and AUC of the benchmark model on the Test Set.  \\
+
+\begin{figure}[h]
+	\centering
+	\caption{ROC of the hyperparameter-optimized Benchmark, Gaussian SVM, applied to the hold-out Test Set.}
+	\label{fig:svm}
+	\includegraphics[scale=0.75]{Figures/roc-svm.png}
+\end{figure}
+
+\subsection{Target Model: XGBoost with Hyperparameter Tuning}
+
+Select the best model from each method/classifier, and apply to the hold-out test set. To prevent data leakage, the hold-out test set will only be used at the very end and not exposed to any classifiers during training. Metrics and plots mentioned in the \textbf{Evaluation Metrics} sections will be reported here as well. \\
+
+\begin{table}[h] 
+	\centering
+	\caption{Candidate XGBoost models built with hyperparameters from Random Search. Ranked by validation-set AUC. See \textbf{Notebook 5} for how the results were curated and exported as a CSV.} 
+	\label{table:xgbhpo}
+	\begin{tabular}{@{}rrrrrr@{}}
+		\toprule
+		\multicolumn{1}{c}{\textbf{Candidate}} & \multicolumn{1}{c}{\textbf{eta}} & \multicolumn{1}{c}{\textbf{gamma}} & \multicolumn{1}{c}{\textbf{max\_depth}} & \multicolumn{1}{c}{\textbf{min\_child\_weight}} & \multicolumn{1}{c}{\textbf{FinalObjectiveValue}} \\ \midrule
+		9                                      & 0.363                            & 9.778                              & 10                                      & 8                                               & 0.9784                                           \\
+		8                                      & 0.228                            & 2.908                              & 10                                      & 4                                               & 0.9762                                           \\
+		7                                      & 0.453                            & 1.255                              & 9                                       & 4                                               & 0.9754                                           \\
+		13                                     & 0.366                            & 1.883                              & 11                                      & 6                                               & 0.9747                                           \\
+		19                                     & 0.225                            & 5.206                              & 7                                       & 2                                               & 0.9732                                           \\
+		15                                     & 0.123                            & 6.444                              & 8                                       & 2                                               & 0.9732                                           \\
+		6                                      & 0.292                            & 9.079                              & 3                                       & 7                                               & 0.9725                                           \\
+		16                                     & 0.375                            & 2.654                              & 11                                      & 8                                               & 0.9717                                           \\
+		12                                     & 0.162                            & 4.036                              & 8                                       & 6                                               & 0.9706                                           \\
+		2                                      & 0.418                            & 8.904                              & 7                                       & 7                                               & 0.9688                                           \\
+		5                                      & 0.341                            & 9.249                              & 9                                       & 8                                               & 0.9654                                           \\
+		4                                      & 0.437                            & 4.705                              & 6                                       & 8                                               & 0.9635                                           \\
+		0                                      & 0.487                            & 6.377                              & 8                                       & 4                                               & 0.9621                                           \\
+		3                                      & 0.330                            & 7.211                              & 8                                       & 8                                               & 0.9617                                           \\
+		10                                     & 0.196                            & 4.590                              & 5                                       & 3                                               & 0.9598                                           \\
+		11                                     & 0.411                            & 7.301                              & 8                                       & 3                                               & 0.9591                                           \\
+		18                                     & 0.430                            & 7.749                              & 10                                      & 6                                               & 0.9580                                           \\
+		17                                     & 0.362                            & 4.262                              & 7                                       & 4                                               & 0.9568                                           \\
+		14                                     & 0.369                            & 1.313                              & 11                                      & 4                                               & 0.9427                                           \\
+		1                                      & 0.221                            & 2.940                              & 11                                      & 3                                               & 0.9412                                           \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+For the final selected model (first row of \textbf{Table \ref{table:xgbhpo}}), when applied to the hold-out test set, macro-averaged F1 score is also 0.81, same as the Benchmark (\textbf{Notebook 5 classification report}). \\
+
+\begin{figure}[h]
+	\centering
+	\caption{ROC of the hyperparameter-tuned XGBoost model candidate applied to the hold-out Test Set.}
+	\label{fig:svm}
+	\includegraphics[scale=0.75]{Figures/roc-xgboost.png}
+\end{figure}
+
+Importantly, the AUC value was \textit{higher} for the XGBoost model than the benchmark SVM on the Test Set (which was identical between the XGBoost and SVM modeling runs because the same \textit{random seed} value was set): 0.964 vs. 0.955, respectively.
+
+\section{Conclusions}
+
+In this healthcare-related project, I used expression profiles of genes to predict triple-negative breast cancer subtype, a classification that currently requires input of a human domain expert with clinical training. The high-dimensional nature of the feature space makes the problem challenging. However, principal components analysis (PCA) suggests the overall goal is promising to solve with machine learning. An L1/LASSO feature selection approach reduced the feature space to only 33 genes. \\
+
+The project involved trickly label definition. The class label requires three metadata columns with assessments from a human domain expert. As we have seen in this dataset, the metadata columns often have missing values which can make training examples scarce and complicate the class label definition process. \\
+
+The latest work in the subject \cite{wu2021} did not exclude the ER, PR, and HER2 gene expression, which is correlated with their respective protein expression and clinical diagnosis, thus suffer from the data leakage problem. Here, I addressed the issue by excluding these three genes from the feature space, thereby making the problem more challenging yet interesting, and the machine-learning solutions presented here thus have greater value. \\
+
+Whenscikit-learn Gaussian SVM was used as the benchmark, I was able to achieve the generally high classification performance reported in liberature \cite{wu2021}. However, using the presumably more robust, complex, and ensemble learning-based XGBoost implemented in AWS Sagemaker, \textbf{I achieved comparable F1 score and suprior AUC values than the benchmark}. It is important to note, however, that the optimization objective I chose was \textit{maximizing the validation AUC}. In theory, I might be able to get higher F1 score (but suffer from lower AUC) had I choose F1 score as the objective metric. Nevertheless, my work here highlights the value of XGBoost, given that the benchmark/baseline model was already well-performing (AUC>0.95).
+
+% \clearpage
+\vskip0.4in
+
+%% References
+\bibliographystyle{unsrt}
+\bibliography{references.bib}
+
+\end{document}
+
+
